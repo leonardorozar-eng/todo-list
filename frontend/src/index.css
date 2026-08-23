@@ -1,0 +1,315 @@
+:root {
+  --bg: #eef4fb;
+  --bg-accent: #dbeafe;
+  --card: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-soft: #eff6ff;
+  --border: #dbe3ef;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --success: #15803d;
+  --success-soft: #f0fdf4;
+  --shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
+  --radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background:
+    radial-gradient(circle at top right, var(--bg-accent), transparent 36%),
+    var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+.app-header h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.app-main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+.auth-card,
+.task-form,
+.task-card,
+.empty-state {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 40px auto 0;
+  padding: 28px;
+}
+
+.auth-card h2,
+.tarefas-top h2,
+.task-form h3,
+.task-card h3 {
+  margin-bottom: 4px;
+}
+
+.auth-subtitle,
+.muted {
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.auth-footer {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font: inherit;
+  background: #f8fbff;
+  color: var(--text);
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: var(--primary);
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  margin-top: 12px;
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #dbeafe;
+}
+
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+  background: #fff;
+  color: var(--text);
+}
+
+.alert {
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.alert-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.alert-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.tarefas-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.task-form {
+  padding: 22px;
+  margin-bottom: 24px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.form-actions .btn-primary {
+  margin-top: 0;
+}
+
+.task-list {
+  display: grid;
+  gap: 14px;
+}
+
+.task-card {
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.task-card p {
+  color: var(--muted);
+  margin-top: 6px;
+  white-space: pre-wrap;
+}
+
+.task-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.empty-state {
+  padding: 28px;
+  text-align: center;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .app-main {
+    padding: 20px 16px 36px;
+  }
+
+  .auth-card {
+    margin-top: 12px;
+    padding: 22px 18px;
+  }
+
+  .tarefas-top {
+    flex-direction: column;
+  }
+
+  .task-card {
+    flex-direction: column;
+  }
+
+  .task-card-actions {
+    flex-direction: row;
+    min-width: 0;
+  }
+
+  .task-card-actions .btn {
+    flex: 1;
+  }
+}

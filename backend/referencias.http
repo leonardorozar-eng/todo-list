@@ -1,0 +1,91 @@
+# Arquivo de exemplos para o REST Client (VS Code)
+# 1) Cadastre um usuário
+# 2) Faça login e copie o token retornado
+# 3) Cole o token em @token
+# 4) Clique em "Send Request" acima de cada bloco
+
+@baseUrl = http://localhost:3001
+@token = cole_o_token_aqui
+@userId = 1
+@taskId = 1
+
+############################################
+# USERS
+############################################
+
+### Cadastro de usuário (POST)
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "password": "123456"
+}
+
+### Login — copie o campo "token" da resposta e cole em @token (POST)
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "teste@email.com",
+  "password": "123456"
+}
+
+### Listar todos os usuários (GET)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### Buscar usuário por ID (GET)
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+### Atualizar o próprio usuário (PUT)
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "email": "novo@email.com",
+  "password": "654321"
+}
+
+### Deletar o próprio usuário (DELETE)
+# Cuidado: isso também apaga as tarefas do usuário (Cascade)
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+############################################
+# TASKS  (todas precisam de token)
+############################################
+
+### Criar tarefa vinculada ao usuário do token (POST)
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Estudar Node.js",
+  "description": "Revisar Express, Prisma e JWT"
+}
+
+### Listar somente as tarefas do usuário logado (GET)
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{token}}
+
+### Buscar uma tarefa por ID (GET)
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+
+### Atualizar uma tarefa (PUT)
+PUT {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Estudar Node.js (atualizado)",
+  "description": "Incluir testes das rotas no REST Client"
+}
+
+### Deletar uma tarefa (DELETE)
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{token}}

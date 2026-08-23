@@ -1,0 +1,30 @@
+// Prisma: define o banco de dados e os modelos usados pela API.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Usuário do sistema (email único + senha com hash)
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  tasks     Task[] // Um usuário tem várias tarefas (1:N)
+}
+
+// Tarefa sempre pertence a um usuário (userId obrigatório)
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

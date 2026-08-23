@@ -1,0 +1,28 @@
+{
+  "name": "todo-list-backend",
+  "version": "1.0.0",
+  "description": "Backend MVP de um sistema To-Do List com Node.js, Express e Prisma",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "keywords": [
+    "todo",
+    "express",
+    "prisma",
+    "sqlite"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.10.1"
+  }
+}
