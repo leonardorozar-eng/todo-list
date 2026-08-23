@@ -60,6 +60,18 @@ npm run dev
 
 O servidor sobe em: `http://localhost:3001`
 
+## Modelagem de Dados (DER)
+
+O banco de dados é composto por duas tabelas relacionadas:
+
+- **User**: armazena os dados dos usuários (id, email, password, createdAt)
+- **Task**: armazena as tarefas (id, title, description, userId, createdAt, updatedAt)
+
+Relacionamento: **User 1:N Task**  
+Cada tarefa pertence obrigatoriamente a um usuário (`userId` é chave estrangeira).
+
+![Diagrama de Entidade e Relacionamento](./der.png)
+
 ## Endpoints
 
 ### Auth / Users
