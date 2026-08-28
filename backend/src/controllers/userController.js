@@ -1,79 +1,62 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+const { pool } = require('../db');
+const { hashPassword, verifyPassword, signToken } = require('../auth');
 
-const prisma = new PrismaClient();
-
-// Campos públicos do usuário (nunca devolver a senha)
-const userPublicSelect = {
-  id: true,
-  email: true,
-  createdAt: true,
-};
+const USER_PUBLIC = 'id, email, created_at AS "createdAt"';
 
 // POST /users/register
-async function register(req, res) {
+async function register(request, reply) {
   try {
-    const { email, password } = req.body;
+    const { email, password } = request.body || {};
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+      return reply.code(400).send({ error: 'Email e senha são obrigatórios.' });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
 
-    if (existingUser) {
-      return res.status(409).json({ error: 'Este email já está cadastrado.' });
+    if (existing.rowCount > 0) {
+      return reply.code(409).send({ error: 'Este email já está cadastrado.' });
     }
 
-    // Hash da senha (nunca salvar a senha em texto puro)
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = hashPassword(password);
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
-      select: userPublicSelect,
-    });
+    const result = await pool.query(
+      `INSERT INTO users (email, password)
+       VALUES ($1, $2)
+       RETURNING ${USER_PUBLIC}`,
+      [email, hashedPassword]
+    );
 
-    return res.status(201).json(user);
+    return reply.code(201).send(result.rows[0]);
   } catch (error) {
     console.error('Erro no cadastro:', error);
-    return res.status(500).json({ error: 'Erro interno ao cadastrar usuário.' });
+    return reply.code(500).send({ error: 'Erro interno ao cadastrar usuário.' });
   }
 }
 
 // POST /users/login
-async function login(req, res) {
+async function login(request, reply) {
   try {
-    const { email, password } = req.body;
+    const { email, password } = request.body || {};
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+      return reply.code(400).send({ error: 'Email e senha são obrigatórios.' });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    // Mesma mensagem para email inexistente ou senha errada (não revela qual falhou)
-    if (!user) {
-      return res.status(401).json({ error: 'Email ou senha inválidos.' });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatch) {
-      return res.status(401).json({ error: 'Email ou senha inválidos.' });
-    }
-
-    // Token JWT: o frontend envia este token no header Authorization
-    const token = jwt.sign(
-      { id: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+    const result = await pool.query(
+      'SELECT id, email, password, created_at AS "createdAt" FROM users WHERE email = $1',
+      [email]
     );
 
-    return res.json({
+    const user = result.rows[0];
+
+    if (!user || !verifyPassword(password, user.password)) {
+      return reply.code(401).send({ error: 'Email ou senha inválidos.' });
+    }
+
+    const token = signToken({ id: user.id }, process.env.JWT_SECRET);
+
+    return reply.send({
       token,
       user: {
         id: user.id,
@@ -83,114 +66,119 @@ async function login(req, res) {
     });
   } catch (error) {
     console.error('Erro no login:', error);
-    return res.status(500).json({ error: 'Erro interno ao fazer login.' });
+    return reply.code(500).send({ error: 'Erro interno ao fazer login.' });
   }
 }
 
 // GET /users  (protegido)
-async function list(req, res) {
+async function list(request, reply) {
   try {
-    const users = await prisma.user.findMany({
-      select: userPublicSelect,
-      orderBy: { id: 'asc' },
-    });
+    const result = await pool.query(
+      `SELECT ${USER_PUBLIC} FROM users ORDER BY id ASC`
+    );
 
-    return res.json(users);
+    return reply.send(result.rows);
   } catch (error) {
     console.error('Erro ao listar usuários:', error);
-    return res.status(500).json({ error: 'Erro interno ao listar usuários.' });
+    return reply.code(500).send({ error: 'Erro interno ao listar usuários.' });
   }
 }
 
 // GET /users/:id  (protegido)
-async function getById(req, res) {
+async function getById(request, reply) {
   try {
-    const id = Number(req.params.id);
+    const id = Number(request.params.id);
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: userPublicSelect,
-    });
+    const result = await pool.query(
+      `SELECT ${USER_PUBLIC} FROM users WHERE id = $1`,
+      [id]
+    );
 
-    if (!user) {
-      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    if (result.rowCount === 0) {
+      return reply.code(404).send({ error: 'Usuário não encontrado.' });
     }
 
-    return res.json(user);
+    return reply.send(result.rows[0]);
   } catch (error) {
     console.error('Erro ao buscar usuário:', error);
-    return res.status(500).json({ error: 'Erro interno ao buscar usuário.' });
+    return reply.code(500).send({ error: 'Erro interno ao buscar usuário.' });
   }
 }
 
 // PUT /users/:id  (protegido — só o próprio usuário)
-async function update(req, res) {
+async function update(request, reply) {
   try {
-    const id = Number(req.params.id);
+    const id = Number(request.params.id);
 
-    // req.userId vem do authMiddleware (id extraído do JWT)
-    if (id !== req.userId) {
-      return res.status(403).json({ error: 'Você só pode atualizar o próprio usuário.' });
+    if (id !== request.userId) {
+      return reply.code(403).send({ error: 'Você só pode atualizar o próprio usuário.' });
     }
 
-    const { email, password } = req.body;
-
-    const data = {};
+    const { email, password } = request.body || {};
+    const fields = [];
+    const values = [];
+    let index = 1;
 
     if (email) {
-      data.email = email;
+      fields.push(`email = $${index++}`);
+      values.push(email);
     }
 
     if (password) {
-      data.password = await bcrypt.hash(password, 10);
+      fields.push(`password = $${index++}`);
+      values.push(hashPassword(password));
     }
 
-    if (Object.keys(data).length === 0) {
-      return res.status(400).json({ error: 'Informe email e/ou senha para atualizar.' });
+    if (fields.length === 0) {
+      return reply.code(400).send({ error: 'Informe email e/ou senha para atualizar.' });
     }
 
-    const user = await prisma.user.update({
-      where: { id },
-      data,
-      select: userPublicSelect,
-    });
+    values.push(id);
 
-    return res.json(user);
+    const result = await pool.query(
+      `UPDATE users
+       SET ${fields.join(', ')}
+       WHERE id = $${index}
+       RETURNING ${USER_PUBLIC}`,
+      values
+    );
+
+    if (result.rowCount === 0) {
+      return reply.code(404).send({ error: 'Usuário não encontrado.' });
+    }
+
+    return reply.send(result.rows[0]);
   } catch (error) {
-    // Prisma P2002 = unique constraint (email duplicado)
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'Este email já está em uso.' });
-    }
-
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    // 23505 = unique_violation (email duplicado)
+    if (error.code === '23505') {
+      return reply.code(409).send({ error: 'Este email já está em uso.' });
     }
 
     console.error('Erro ao atualizar usuário:', error);
-    return res.status(500).json({ error: 'Erro interno ao atualizar usuário.' });
+    return reply.code(500).send({ error: 'Erro interno ao atualizar usuário.' });
   }
 }
 
 // DELETE /users/:id  (protegido — só o próprio usuário)
-async function remove(req, res) {
+async function remove(request, reply) {
   try {
-    const id = Number(req.params.id);
+    const id = Number(request.params.id);
 
-    if (id !== req.userId) {
-      return res.status(403).json({ error: 'Você só pode deletar o próprio usuário.' });
+    if (id !== request.userId) {
+      return reply.code(403).send({ error: 'Você só pode deletar o próprio usuário.' });
     }
 
-    // onDelete: Cascade no schema também apaga as tarefas deste usuário
-    await prisma.user.delete({ where: { id } });
+    // ON DELETE CASCADE no SQL também apaga as tarefas deste usuário
+    const result = await pool.query('DELETE FROM users WHERE id = $1', [id]);
 
-    return res.status(204).send();
+    if (result.rowCount === 0) {
+      return reply.code(404).send({ error: 'Usuário não encontrado.' });
+    }
+
+    return reply.code(204).send();
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Usuário não encontrado.' });
-    }
-
     console.error('Erro ao deletar usuário:', error);
-    return res.status(500).json({ error: 'Erro interno ao deletar usuário.' });
+    return reply.code(500).send({ error: 'Erro interno ao deletar usuário.' });
   }
 }
 

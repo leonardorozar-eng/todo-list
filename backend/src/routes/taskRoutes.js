@@ -1,16 +1,15 @@
-const express = require('express');
 const taskController = require('../controllers/taskController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-const router = express.Router();
+async function taskRoutes(fastify) {
+  // Todas as rotas de tarefas exigem token
+  fastify.addHook('preHandler', authMiddleware);
 
-// Todas as rotas de tarefas exigem token
-router.use(authMiddleware);
+  fastify.post('/', taskController.create);
+  fastify.get('/', taskController.list);
+  fastify.get('/:id', taskController.getById);
+  fastify.put('/:id', taskController.update);
+  fastify.delete('/:id', taskController.remove);
+}
 
-router.post('/', taskController.create);
-router.get('/', taskController.list);
-router.get('/:id', taskController.getById);
-router.put('/:id', taskController.update);
-router.delete('/:id', taskController.remove);
-
-module.exports = router;
+module.exports = taskRoutes;

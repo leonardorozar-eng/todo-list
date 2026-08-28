@@ -1,134 +1,150 @@
-const { PrismaClient } = require('@prisma/client');
+const { pool } = require('../db');
 
-const prisma = new PrismaClient();
+const TASK_PUBLIC =
+  'id, title, description, user_id AS "userId", created_at AS "createdAt", updated_at AS "updatedAt"';
 
 // POST /tasks  (protegido)
-// A tarefa SEMPRE é vinculada ao usuário do token (req.userId)
-async function create(req, res) {
+// A tarefa SEMPRE é vinculada ao usuário do token (request.userId)
+async function create(request, reply) {
   try {
-    const { title, description } = req.body;
+    const { title, description } = request.body || {};
 
     if (!title) {
-      return res.status(400).json({ error: 'O título da tarefa é obrigatório.' });
+      return reply.code(400).send({ error: 'O título da tarefa é obrigatório.' });
     }
 
-    const task = await prisma.task.create({
-      data: {
-        title,
-        description: description || '',
-        userId: req.userId, // vem do JWT, não do body (evita criar tarefa para outro usuário)
-      },
-    });
+    const result = await pool.query(
+      `INSERT INTO tasks (title, description, user_id)
+       VALUES ($1, $2, $3)
+       RETURNING ${TASK_PUBLIC}`,
+      [title, description || '', request.userId]
+    );
 
-    return res.status(201).json(task);
+    return reply.code(201).send(result.rows[0]);
   } catch (error) {
     console.error('Erro ao criar tarefa:', error);
-    return res.status(500).json({ error: 'Erro interno ao criar tarefa.' });
+    return reply.code(500).send({ error: 'Erro interno ao criar tarefa.' });
   }
 }
 
 // GET /tasks  (protegido)
 // Lista SOMENTE as tarefas do usuário logado
-async function list(req, res) {
+async function list(request, reply) {
   try {
-    const tasks = await prisma.task.findMany({
-      where: { userId: req.userId },
-      orderBy: { createdAt: 'desc' },
-    });
+    const result = await pool.query(
+      `SELECT ${TASK_PUBLIC}
+       FROM tasks
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [request.userId]
+    );
 
-    return res.json(tasks);
+    return reply.send(result.rows);
   } catch (error) {
     console.error('Erro ao listar tarefas:', error);
-    return res.status(500).json({ error: 'Erro interno ao listar tarefas.' });
+    return reply.code(500).send({ error: 'Erro interno ao listar tarefas.' });
   }
 }
 
 // GET /tasks/:id  (protegido)
-async function getById(req, res) {
+async function getById(request, reply) {
   try {
-    const id = Number(req.params.id);
+    const id = Number(request.params.id);
 
-    const task = await prisma.task.findUnique({ where: { id } });
+    const result = await pool.query(
+      `SELECT ${TASK_PUBLIC} FROM tasks WHERE id = $1`,
+      [id]
+    );
+
+    const task = result.rows[0];
 
     if (!task) {
-      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+      return reply.code(404).send({ error: 'Tarefa não encontrada.' });
     }
 
-    // Um usuário só pode ver as próprias tarefas
-    if (task.userId !== req.userId) {
-      return res.status(403).json({ error: 'Você não tem permissão para ver esta tarefa.' });
+    if (task.userId !== request.userId) {
+      return reply.code(403).send({ error: 'Você não tem permissão para ver esta tarefa.' });
     }
 
-    return res.json(task);
+    return reply.send(task);
   } catch (error) {
     console.error('Erro ao buscar tarefa:', error);
-    return res.status(500).json({ error: 'Erro interno ao buscar tarefa.' });
+    return reply.code(500).send({ error: 'Erro interno ao buscar tarefa.' });
   }
 }
 
 // PUT /tasks/:id  (protegido)
-async function update(req, res) {
+async function update(request, reply) {
   try {
-    const id = Number(req.params.id);
-    const { title, description } = req.body;
+    const id = Number(request.params.id);
+    const { title, description } = request.body || {};
 
-    const task = await prisma.task.findUnique({ where: { id } });
+    const found = await pool.query(
+      `SELECT ${TASK_PUBLIC} FROM tasks WHERE id = $1`,
+      [id]
+    );
+
+    const task = found.rows[0];
 
     if (!task) {
-      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+      return reply.code(404).send({ error: 'Tarefa não encontrada.' });
     }
 
-    if (task.userId !== req.userId) {
-      return res.status(403).json({ error: 'Você não tem permissão para editar esta tarefa.' });
+    if (task.userId !== request.userId) {
+      return reply.code(403).send({ error: 'Você não tem permissão para editar esta tarefa.' });
     }
 
-    const data = {};
-
-    if (title !== undefined) {
-      data.title = title;
+    if (title === undefined && description === undefined) {
+      return reply.code(400).send({ error: 'Informe título e/ou descrição para atualizar.' });
     }
 
-    if (description !== undefined) {
-      data.description = description;
-    }
+    const result = await pool.query(
+      `UPDATE tasks
+       SET title = COALESCE($1, title),
+           description = COALESCE($2, description),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING ${TASK_PUBLIC}`,
+      [
+        title !== undefined ? title : null,
+        description !== undefined ? description : null,
+        id,
+      ]
+    );
 
-    if (Object.keys(data).length === 0) {
-      return res.status(400).json({ error: 'Informe título e/ou descrição para atualizar.' });
-    }
-
-    const updatedTask = await prisma.task.update({
-      where: { id },
-      data,
-    });
-
-    return res.json(updatedTask);
+    return reply.send(result.rows[0]);
   } catch (error) {
     console.error('Erro ao atualizar tarefa:', error);
-    return res.status(500).json({ error: 'Erro interno ao atualizar tarefa.' });
+    return reply.code(500).send({ error: 'Erro interno ao atualizar tarefa.' });
   }
 }
 
 // DELETE /tasks/:id  (protegido)
-async function remove(req, res) {
+async function remove(request, reply) {
   try {
-    const id = Number(req.params.id);
+    const id = Number(request.params.id);
 
-    const task = await prisma.task.findUnique({ where: { id } });
+    const found = await pool.query(
+      `SELECT ${TASK_PUBLIC} FROM tasks WHERE id = $1`,
+      [id]
+    );
+
+    const task = found.rows[0];
 
     if (!task) {
-      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+      return reply.code(404).send({ error: 'Tarefa não encontrada.' });
     }
 
-    if (task.userId !== req.userId) {
-      return res.status(403).json({ error: 'Você não tem permissão para deletar esta tarefa.' });
+    if (task.userId !== request.userId) {
+      return reply.code(403).send({ error: 'Você não tem permissão para deletar esta tarefa.' });
     }
 
-    await prisma.task.delete({ where: { id } });
+    await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
 
-    return res.status(204).send();
+    return reply.code(204).send();
   } catch (error) {
     console.error('Erro ao deletar tarefa:', error);
-    return res.status(500).json({ error: 'Erro interno ao deletar tarefa.' });
+    return reply.code(500).send({ error: 'Erro interno ao deletar tarefa.' });
   }
 }
 

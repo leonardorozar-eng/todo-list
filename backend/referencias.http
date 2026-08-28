@@ -65,7 +65,7 @@ Content-Type: application/json
 
 {
   "title": "Estudar Node.js",
-  "description": "Revisar Express, Prisma e JWT"
+  "description": "Revisar Fastify, pg e JWT"
 }
 
 ### Listar somente as tarefas do usuário logado (GET)

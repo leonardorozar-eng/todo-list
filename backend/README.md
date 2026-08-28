@@ -2,10 +2,9 @@
 
 API REST de um sistema de tarefas, com autenticação JWT.
 
-- **Node.js** + **Express**
-- **Prisma ORM** + **SQLite**
-- **bcryptjs** (hash de senha)
-- **jsonwebtoken** (login)
+- **Node.js** + **Fastify**
+- **PostgreSQL** com o driver **pg**
+- Hash de senha e JWT com o módulo nativo `crypto` do Node
 - Porta padrão: **3001**
 
 ## Como instalar
@@ -34,23 +33,23 @@ Conteúdo esperado:
 
 ```
 PORT=3001
-DATABASE_URL="file:./dev.db"
+DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/todo_list
 JWT_SECRET=troque_esta_chave_secreta
 ```
 
 - `PORT` — porta do servidor
-- `DATABASE_URL` — arquivo SQLite (fica em `prisma/dev.db`)
+- `DATABASE_URL` — conexão com o PostgreSQL
 - `JWT_SECRET` — chave usada para assinar o token de login
 
-## Como rodar as migrations
+## Como preparar o banco
 
-Cria as tabelas `User` e `Task` no SQLite:
+1. Crie o banco no PostgreSQL (ajuste o usuário se necessário):
 
 ```bash
-npx prisma migrate dev
+psql -U postgres -c "CREATE DATABASE todo_list;"
 ```
 
-Quando o Prisma pedir um nome para a migration, use por exemplo: `init`.
+2. As tabelas `users` e `tasks` são criadas automaticamente na primeira vez que o servidor sobe.
 
 ## Como iniciar o servidor
 
@@ -104,7 +103,7 @@ Há pelo menos um exemplo de **POST, GET, PUT e DELETE** para users e para tasks
 
 ## Regras importantes
 
-1. A senha é salva com **bcrypt** (nunca em texto puro).
+1. A senha é salva com **hash** (nunca em texto puro).
 2. O login devolve um **JWT** válido por 1 dia.
 3. Toda tarefa é criada com o `userId` do token (não vem do body).
 4. Um usuário só vê, edita e deleta **as próprias tarefas**.

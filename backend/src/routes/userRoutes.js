@@ -1,17 +1,16 @@
-const express = require('express');
 const userController = require('../controllers/userController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-const router = express.Router();
+async function userRoutes(fastify) {
+  // Rotas públicas (não precisam de token)
+  fastify.post('/register', userController.register);
+  fastify.post('/login', userController.login);
 
-// Rotas públicas (não precisam de token)
-router.post('/register', userController.register);
-router.post('/login', userController.login);
+  // Rotas protegidas (precisam de JWT válido)
+  fastify.get('/', { preHandler: authMiddleware }, userController.list);
+  fastify.get('/:id', { preHandler: authMiddleware }, userController.getById);
+  fastify.put('/:id', { preHandler: authMiddleware }, userController.update);
+  fastify.delete('/:id', { preHandler: authMiddleware }, userController.remove);
+}
 
-// Rotas protegidas (precisam de JWT válido)
-router.get('/', authMiddleware, userController.list);
-router.get('/:id', authMiddleware, userController.getById);
-router.put('/:id', authMiddleware, userController.update);
-router.delete('/:id', authMiddleware, userController.remove);
-
-module.exports = router;
+module.exports = userRoutes;
