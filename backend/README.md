@@ -1,63 +1,34 @@
-# Backend — To-Do List (MVP)
+# Backend — To-Do List
 
-API REST de um sistema de tarefas, com autenticação JWT.
+API em **Node.js + Fastify + PostgreSQL (pg)**.
 
-- **Node.js** + **Fastify**
-- **PostgreSQL** com o driver **pg**
-- Hash de senha e JWT com o módulo nativo `crypto` do Node
-- Porta padrão: **3001**
+Porta: **3001**
 
 ## Como instalar
-
-Na pasta `backend`:
 
 ```bash
 npm install
 ```
 
-## Como configurar o .env
+## Banco de dados
 
-Copie o arquivo de exemplo e ajuste se quiser:
-
-```bash
-copy .env.example .env
-```
-
-No Linux/macOS:
-
-```bash
-cp .env.example .env
-```
-
-Conteúdo esperado:
-
-```
-PORT=3001
-DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/todo_list
-JWT_SECRET=troque_esta_chave_secreta
-```
-
-- `PORT` — porta do servidor
-- `DATABASE_URL` — conexão com o PostgreSQL
-- `JWT_SECRET` — chave usada para assinar o token de login
-
-## Como preparar o banco
-
-1. Crie o banco no PostgreSQL (ajuste o usuário se necessário):
+Crie o banco no PostgreSQL:
 
 ```bash
 psql -U postgres -c "CREATE DATABASE todo_list;"
 ```
 
-2. As tabelas `users` e `tasks` são criadas automaticamente na primeira vez que o servidor sobe.
+Senha usada no código: `senai` (igual às aulas).
 
-## Como iniciar o servidor
+O arquivo `banco.sql` tem as tabelas. Elas também são criadas automaticamente quando o servidor sobe.
+
+## Como iniciar
 
 ```bash
 npm run dev
 ```
 
-O servidor sobe em: `http://localhost:3001`
+Servidor: `http://localhost:3001`
 
 ## Modelagem de Dados (DER)
 
@@ -73,11 +44,11 @@ Cada tarefa pertence obrigatoriamente a um usuário (`userId` é chave estrangei
 
 ## Endpoints
 
-### Auth / Users
+### Users
 
 | Método | Rota              | Auth | Descrição              |
 |--------|-------------------|------|------------------------|
-| POST   | `/users/register` | Não  | Cadastro (senha hash)  |
+| POST   | `/users/register` | Não  | Cadastro               |
 | POST   | `/users/login`    | Não  | Login (retorna JWT)    |
 | GET    | `/users`          | Sim  | Listar usuários        |
 | GET    | `/users/:id`      | Sim  | Buscar usuário         |
@@ -86,24 +57,14 @@ Cada tarefa pertence obrigatoriamente a um usuário (`userId` é chave estrangei
 
 ### Tasks
 
-Todas exigem header: `Authorization: Bearer <token>`
+Todas exigem `Authorization: Bearer <token>`
 
-| Método | Rota         | Descrição                                      |
-|--------|--------------|------------------------------------------------|
-| POST   | `/tasks`     | Criar tarefa (vinculada ao usuário do token)   |
-| GET    | `/tasks`     | Listar só as tarefas do usuário logado         |
-| GET    | `/tasks/:id` | Buscar uma tarefa (se for do usuário)          |
-| PUT    | `/tasks/:id` | Editar (se for do usuário)                     |
-| DELETE | `/tasks/:id` | Deletar (se for do usuário)                    |
+| Método | Rota         | Descrição                    |
+|--------|--------------|------------------------------|
+| POST   | `/tasks`     | Criar tarefa do usuário      |
+| GET    | `/tasks`     | Listar tarefas do usuário    |
+| GET    | `/tasks/:id` | Buscar uma tarefa            |
+| PUT    | `/tasks/:id` | Editar                       |
+| DELETE | `/tasks/:id` | Deletar                      |
 
-## Testar as rotas
-
-Abra `referencias.http` no VS Code com a extensão **REST Client**.
-Há pelo menos um exemplo de **POST, GET, PUT e DELETE** para users e para tasks.
-
-## Regras importantes
-
-1. A senha é salva com **hash** (nunca em texto puro).
-2. O login devolve um **JWT** válido por 1 dia.
-3. Toda tarefa é criada com o `userId` do token (não vem do body).
-4. Um usuário só vê, edita e deleta **as próprias tarefas**.
+Testes prontos em `referencias.http`.

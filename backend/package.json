@@ -1,19 +1,16 @@
 {
   "name": "todo-list-backend",
   "version": "1.0.0",
-  "description": "Backend MVP de um sistema To-Do List com Node.js, Fastify e PostgreSQL (pg)",
-  "main": "src/server.js",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "dev": "node --watch server.js",
+    "start": "node --watch server.js"
   },
-  "keywords": [
-    "todo",
-    "fastify",
-    "pg",
-    "postgresql"
-  ],
-  "license": "MIT",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Backend To-Do List com Node.js, Fastify e PostgreSQL",
   "dependencies": {
     "fastify": "^5.2.1",
     "pg": "^8.13.1"

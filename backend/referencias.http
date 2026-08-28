@@ -1,20 +1,5 @@
-# Arquivo de exemplos para o REST Client (VS Code)
-# 1) Cadastre um usuário
-# 2) Faça login e copie o token retornado
-# 3) Cole o token em @token
-# 4) Clique em "Send Request" acima de cada bloco
-
-@baseUrl = http://localhost:3001
-@token = cole_o_token_aqui
-@userId = 1
-@taskId = 1
-
-############################################
-# USERS
-############################################
-
-### Cadastro de usuário (POST)
-POST {{baseUrl}}/users/register
+### Cadastro de usuário
+POST http://localhost:3001/users/register
 Content-Type: application/json
 
 {
@@ -22,8 +7,8 @@ Content-Type: application/json
   "password": "123456"
 }
 
-### Login — copie o campo "token" da resposta e cole em @token (POST)
-POST {{baseUrl}}/users/login
+### Login
+POST http://localhost:3001/users/login
 Content-Type: application/json
 
 {
@@ -31,17 +16,17 @@ Content-Type: application/json
   "password": "123456"
 }
 
-### Listar todos os usuários (GET)
-GET {{baseUrl}}/users
-Authorization: Bearer {{token}}
+### Listar usuários
+GET http://localhost:3001/users
+Authorization: Bearer cole_o_token_aqui
 
-### Buscar usuário por ID (GET)
-GET {{baseUrl}}/users/{{userId}}
-Authorization: Bearer {{token}}
+### Buscar usuário por ID
+GET http://localhost:3001/users/1
+Authorization: Bearer cole_o_token_aqui
 
-### Atualizar o próprio usuário (PUT)
-PUT {{baseUrl}}/users/{{userId}}
-Authorization: Bearer {{token}}
+### Atualizar usuário
+PUT http://localhost:3001/users/1
+Authorization: Bearer cole_o_token_aqui
 Content-Type: application/json
 
 {
@@ -49,18 +34,13 @@ Content-Type: application/json
   "password": "654321"
 }
 
-### Deletar o próprio usuário (DELETE)
-# Cuidado: isso também apaga as tarefas do usuário (Cascade)
-DELETE {{baseUrl}}/users/{{userId}}
-Authorization: Bearer {{token}}
+### Deletar usuário
+DELETE http://localhost:3001/users/1
+Authorization: Bearer cole_o_token_aqui
 
-############################################
-# TASKS  (todas precisam de token)
-############################################
-
-### Criar tarefa vinculada ao usuário do token (POST)
-POST {{baseUrl}}/tasks
-Authorization: Bearer {{token}}
+### Criar tarefa
+POST http://localhost:3001/tasks
+Authorization: Bearer cole_o_token_aqui
 Content-Type: application/json
 
 {
@@ -68,17 +48,17 @@ Content-Type: application/json
   "description": "Revisar Fastify, pg e JWT"
 }
 
-### Listar somente as tarefas do usuário logado (GET)
-GET {{baseUrl}}/tasks
-Authorization: Bearer {{token}}
+### Listar tarefas
+GET http://localhost:3001/tasks
+Authorization: Bearer cole_o_token_aqui
 
-### Buscar uma tarefa por ID (GET)
-GET {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{token}}
+### Buscar tarefa por ID
+GET http://localhost:3001/tasks/1
+Authorization: Bearer cole_o_token_aqui
 
-### Atualizar uma tarefa (PUT)
-PUT {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{token}}
+### Atualizar tarefa
+PUT http://localhost:3001/tasks/1
+Authorization: Bearer cole_o_token_aqui
 Content-Type: application/json
 
 {
@@ -86,6 +66,6 @@ Content-Type: application/json
   "description": "Incluir testes das rotas no REST Client"
 }
 
-### Deletar uma tarefa (DELETE)
-DELETE {{baseUrl}}/tasks/{{taskId}}
-Authorization: Bearer {{token}}
+### Deletar tarefa
+DELETE http://localhost:3001/tasks/1
+Authorization: Bearer cole_o_token_aqui

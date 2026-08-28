@@ -1,30 +1,20 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { loginUser } from '../services/api.js';
+import { registerUser } from '../services/api.js';
 
-function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
+export default function Cadastro({ irParaLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [erro, setErro] = useState('');
-  const [sucesso, setSucesso] = useState(location.state?.mensagem || '');
   const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setErro('');
-    setSucesso('');
     setCarregando(true);
 
     try {
-      const data = await loginUser(email, password);
-
-      // Guarda o JWT para as próximas requisições autenticadas
-      localStorage.setItem('token', data.token);
-
-      navigate('/tarefas');
+      await registerUser(email, password);
+      irParaLogin();
     } catch (error) {
       setErro(error.message);
     } finally {
@@ -34,45 +24,44 @@ function Login() {
 
   return (
     <section className="auth-card">
-      <h2>Entrar</h2>
-      <p className="auth-subtitle">Use seu email e senha para acessar as tarefas.</p>
+      <h2>Criar conta</h2>
+      <p className="auth-subtitle">Cadastre um email e uma senha para começar.</p>
 
-      {sucesso && <p className="alert alert-success">{sucesso}</p>}
       {erro && <p className="alert alert-error">{erro}</p>}
 
       <form onSubmit={handleSubmit} className="form">
-        <label htmlFor="login-email">Email</label>
+        <label htmlFor="register-email">Email</label>
         <input
-          id="login-email"
+          id="register-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="voce@email.com"
           required
-          autoComplete="email"
         />
 
-        <label htmlFor="login-password">Senha</label>
+        <label htmlFor="register-password">Senha</label>
         <input
-          id="login-password"
+          id="register-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Sua senha"
+          placeholder="Mínimo 6 caracteres"
           required
-          autoComplete="current-password"
+          minLength={6}
         />
 
         <button type="submit" className="btn btn-primary" disabled={carregando}>
-          {carregando ? 'Entrando...' : 'Entrar'}
+          {carregando ? 'Cadastrando...' : 'Cadastrar'}
         </button>
       </form>
 
       <p className="auth-footer">
-        Ainda não tem conta? <Link to="/register">Cadastre-se</Link>
+        Já tem conta?{' '}
+        <button type="button" className="link-button" onClick={irParaLogin}>
+          Entrar
+        </button>
       </p>
     </section>
   );
 }
-
-export default Login;

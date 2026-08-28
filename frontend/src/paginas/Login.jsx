@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { registerUser } from '../services/api.js';
+import { loginUser } from '../services/api.js';
 
-function Register() {
-  const navigate = useNavigate();
-
+export default function Login({ aoLogar, irParaCadastro }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [erro, setErro] = useState('');
@@ -16,12 +13,9 @@ function Register() {
     setCarregando(true);
 
     try {
-      await registerUser(email, password);
-
-      // Depois do cadastro, o usuário faz login manualmente
-      navigate('/login', {
-        state: { mensagem: 'Cadastro realizado com sucesso! Faça login.' },
-      });
+      const data = await loginUser(email, password);
+      localStorage.setItem('token', data.token);
+      aoLogar();
     } catch (error) {
       setErro(error.message);
     } finally {
@@ -31,45 +25,43 @@ function Register() {
 
   return (
     <section className="auth-card">
-      <h2>Criar conta</h2>
-      <p className="auth-subtitle">Cadastre um email e uma senha para começar.</p>
+      <h2>Entrar</h2>
+      <p className="auth-subtitle">Use seu email e senha para acessar as tarefas.</p>
 
       {erro && <p className="alert alert-error">{erro}</p>}
 
       <form onSubmit={handleSubmit} className="form">
-        <label htmlFor="register-email">Email</label>
+        <label htmlFor="login-email">Email</label>
         <input
-          id="register-email"
+          id="login-email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="voce@email.com"
           required
-          autoComplete="email"
         />
 
-        <label htmlFor="register-password">Senha</label>
+        <label htmlFor="login-password">Senha</label>
         <input
-          id="register-password"
+          id="login-password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Sua senha"
           required
-          minLength={6}
-          autoComplete="new-password"
         />
 
         <button type="submit" className="btn btn-primary" disabled={carregando}>
-          {carregando ? 'Cadastrando...' : 'Cadastrar'}
+          {carregando ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
 
       <p className="auth-footer">
-        Já tem conta? <Link to="/login">Entrar</Link>
+        Ainda não tem conta?{' '}
+        <button type="button" className="link-button" onClick={irParaCadastro}>
+          Cadastre-se
+        </button>
       </p>
     </section>
   );
 }
-
-export default Register;

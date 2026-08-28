@@ -1,53 +1,62 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import Login from './components/Login.jsx';
-import Register from './components/Register.jsx';
-import Tarefas from './components/Tarefas.jsx';
-
-// Rota protegida: se não houver token no localStorage, manda para /login.
-function RotaPrivada({ children }) {
-  const token = localStorage.getItem('token');
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-}
+import { useState } from 'react';
+import Login from './paginas/Login.jsx';
+import Cadastro from './paginas/Cadastro.jsx';
+import Tarefas from './paginas/Tarefas.jsx';
 
 function App() {
+  const [tela, setTela] = useState(localStorage.getItem('token') ? 'tarefas' : 'login');
+
+  function trocarDeTela(pagina) {
+    if (pagina === 'tarefas' && !localStorage.getItem('token')) {
+      setTela('login');
+      return;
+    }
+
+    setTela(pagina);
+  }
+
+  function renderizar() {
+    if (tela === 'login') {
+      return <Login aoLogar={() => setTela('tarefas')} irParaCadastro={() => setTela('cadastro')} />;
+    }
+
+    if (tela === 'cadastro') {
+      return <Cadastro irParaLogin={() => setTela('login')} />;
+    }
+
+    if (tela === 'tarefas') {
+      return (
+        <Tarefas
+          aoSair={() => {
+            localStorage.removeItem('token');
+            setTela('login');
+          }}
+        />
+      );
+    }
+
+    return <Login aoLogar={() => setTela('tarefas')} irParaCadastro={() => setTela('cadastro')} />;
+  }
+
   return (
-    // BrowserRouter habilita as rotas no navegador (URL muda sem recarregar a página)
-    <BrowserRouter>
-      <div className="app-shell">
-        <header className="app-header">
-          <div className="app-header-inner">
-            <span className="logo-mark" aria-hidden="true">✓</span>
-            <h1>To-Do List</h1>
-          </div>
-        </header>
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <span className="logo-mark" aria-hidden="true">✓</span>
+          <h1>To-Do List</h1>
+        </div>
+      </header>
 
-        <main className="app-main">
-          <Routes>
-            {/* Rotas públicas */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      <nav className="app-nav">
+        <button type="button" onClick={() => trocarDeTela('cadastro')}>Cadastro</button>
+        <button type="button" onClick={() => trocarDeTela('login')}>Login</button>
+        <button type="button" onClick={() => trocarDeTela('tarefas')}>Tarefas</button>
+      </nav>
 
-            {/* /tarefas só abre se o usuário estiver logado */}
-            <Route
-              path="/tarefas"
-              element={
-                <RotaPrivada>
-                  <Tarefas />
-                </RotaPrivada>
-              }
-            />
-
-            {/* Qualquer outro caminho cai na área de tarefas (ou no login, se não tiver token) */}
-            <Route path="*" element={<Navigate to="/tarefas" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+      <main className="app-main">
+        {renderizar()}
+      </main>
+    </div>
   );
 }
 
