@@ -1,12 +1,27 @@
 # Frontend — To-Do List
 
-React + Vite. Telas em `src/paginas/` (Login, Cadastro e Tarefas).
+Interface em Vite + React da avaliação prática de recuperação.
+
+Porta: **5173**  
+API: **http://localhost:3000**
+
+## Como instalar e iniciar
+
+O backend precisa estar rodando na porta 3000.
 
 ```bash
 npm install
-npm run dev
+npm start
 ```
 
-Abra `http://localhost:5173`
+Abra: `http://localhost:5173`
 
-O backend precisa estar em `http://localhost:3001`.
+Rotas:
+
+- `/login`
+- `/cadastro`
+- `/tarefas` (precisa de token)
+
+## Git
+
+Não envie `node_modules` nem `.env` (já estão no `.gitignore`).

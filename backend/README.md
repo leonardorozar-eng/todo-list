@@ -1,70 +1,51 @@
 # Backend — To-Do List
 
-API em **Node.js + Fastify + PostgreSQL (pg)**.
+API REST da avaliação prática de recuperação.
 
-Porta: **3001**
+- Node.js + Fastify + pg
+- PostgreSQL (`todo_db`)
+- Porta: **3000**
 
-## Como instalar
+## Como criar o banco no pgAdmin
+
+1. Abra o pgAdmin e conecte no servidor local.
+2. Clique com o botão direito em **Databases** → **Create** → **Database**.
+3. Nome: `todo_db`
+4. Ou rode no Query Tool (conectado em `postgres`):
+
+```sql
+CREATE DATABASE todo_db;
+```
+
+## Como rodar o banco.sql
+
+1. Conecte no banco `todo_db`.
+2. Abra o arquivo `banco.sql`.
+3. Execute os `CREATE TABLE` (users e tarefas).
+
+Se o banco ainda não existir, a primeira linha do arquivo cria o `todo_db`.
+
+## Como instalar e iniciar
 
 ```bash
 npm install
+npm start
 ```
 
-## Banco de dados
+API: `http://localhost:3000`
 
-Crie o banco no PostgreSQL:
+## Variáveis
 
-```bash
-psql -U postgres -c "CREATE DATABASE todo_list;"
-```
+Não há arquivo `.env`. A conexão está no `server.js`:
 
-Senha usada no código: `senai` (igual às aulas).
+- user: `postgres`
+- password: `senai`
+- host: `localhost`
+- port: `5432`
+- database: `todo_db`
 
-O arquivo `banco.sql` tem as tabelas. Elas também são criadas automaticamente quando o servidor sobe.
+JWT secret (fixo no código, só para aula): `senai-todo-secret`
 
-## Como iniciar
+## Git
 
-```bash
-npm run dev
-```
-
-Servidor: `http://localhost:3001`
-
-## Modelagem de Dados (DER)
-
-O banco de dados é composto por duas tabelas relacionadas:
-
-- **User**: armazena os dados dos usuários (id, email, password, createdAt)
-- **Task**: armazena as tarefas (id, title, description, userId, createdAt, updatedAt)
-
-Relacionamento: **User 1:N Task**  
-Cada tarefa pertence obrigatoriamente a um usuário (`userId` é chave estrangeira).
-
-![Diagrama de Entidade e Relacionamento](./der.png)
-
-## Endpoints
-
-### Users
-
-| Método | Rota              | Auth | Descrição              |
-|--------|-------------------|------|------------------------|
-| POST   | `/users/register` | Não  | Cadastro               |
-| POST   | `/users/login`    | Não  | Login (retorna JWT)    |
-| GET    | `/users`          | Sim  | Listar usuários        |
-| GET    | `/users/:id`      | Sim  | Buscar usuário         |
-| PUT    | `/users/:id`      | Sim  | Atualizar (só o próprio) |
-| DELETE | `/users/:id`      | Sim  | Deletar (só o próprio) |
-
-### Tasks
-
-Todas exigem `Authorization: Bearer <token>`
-
-| Método | Rota         | Descrição                    |
-|--------|--------------|------------------------------|
-| POST   | `/tasks`     | Criar tarefa do usuário      |
-| GET    | `/tasks`     | Listar tarefas do usuário    |
-| GET    | `/tasks/:id` | Buscar uma tarefa            |
-| PUT    | `/tasks/:id` | Editar                       |
-| DELETE | `/tasks/:id` | Deletar                      |
-
-Testes prontos em `referencias.http`.
+Não envie `node_modules` nem `.env` (já estão no `.gitignore`).

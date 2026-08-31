@@ -4,15 +4,16 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch server.js",
     "start": "node --watch server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Backend To-Do List com Node.js, Fastify e PostgreSQL",
+  "description": "Backend To-Do List - avaliação prática de recuperação",
   "dependencies": {
+    "@fastify/cors": "^10.0.2",
     "fastify": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1"
   }
 }

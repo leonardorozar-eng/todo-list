@@ -1,20 +1,21 @@
-# To-Do List
+# To-Do List — Avaliação prática de recuperação
 
-Projeto único com **backend** (Fastify + PostgreSQL) e **frontend** (React + Vite).
+Dois projetos na mesma workspace:
 
 ```
 todo-list/
-├── backend/     → Node.js + Fastify + pg (porta 3001)
-└── frontend/    → React + Vite (porta 5173)
+├── backend/     → Fastify + pg (porta 3000)
+└── frontend/    → Vite + React (porta 5173)
 ```
 
 ## Backend
 
+No pgAdmin, crie o banco `todo_db` e rode o `backend/banco.sql`.
+
 ```bash
 cd backend
 npm install
-psql -U postgres -c "CREATE DATABASE todo_list;"
-npm run dev
+npm start
 ```
 
 ## Frontend
@@ -22,8 +23,7 @@ npm run dev
 ```bash
 cd frontend
 npm install
-npm run dev
+npm start
 ```
 
-App: `http://localhost:5173`  
-API: `http://localhost:3001`
+Não envie `node_modules`.

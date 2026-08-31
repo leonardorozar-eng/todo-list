@@ -1,71 +1,64 @@
+### Health check
+GET http://localhost:3000/
+
 ### Cadastro de usuário
-POST http://localhost:3001/users/register
+POST http://localhost:3000/usuarios
 Content-Type: application/json
 
 {
   "email": "teste@email.com",
-  "password": "123456"
+  "senha": "123456"
 }
 
 ### Login
-POST http://localhost:3001/users/login
+# Copiar o token da resposta e colar no Authorization das rotas de tarefas
+POST http://localhost:3000/login
 Content-Type: application/json
 
 {
   "email": "teste@email.com",
-  "password": "123456"
+  "senha": "123456"
 }
 
-### Listar usuários
-GET http://localhost:3001/users
-Authorization: Bearer cole_o_token_aqui
-
-### Buscar usuário por ID
-GET http://localhost:3001/users/1
-Authorization: Bearer cole_o_token_aqui
+### Listar usuários (sem senha)
+GET http://localhost:3000/usuarios
 
 ### Atualizar usuário
-PUT http://localhost:3001/users/1
-Authorization: Bearer cole_o_token_aqui
+PUT http://localhost:3000/usuarios/1
 Content-Type: application/json
 
 {
   "email": "novo@email.com",
-  "password": "654321"
+  "senha": "654321"
 }
 
 ### Deletar usuário
-DELETE http://localhost:3001/users/1
+DELETE http://localhost:3000/usuarios/1
+
+### Listar tarefas do usuário logado
+GET http://localhost:3000/tarefas
 Authorization: Bearer cole_o_token_aqui
 
 ### Criar tarefa
-POST http://localhost:3001/tasks
+POST http://localhost:3000/tarefas
 Authorization: Bearer cole_o_token_aqui
 Content-Type: application/json
 
 {
-  "title": "Estudar Node.js",
-  "description": "Revisar Fastify, pg e JWT"
+  "titulo": "Estudar Node.js",
+  "descricao": "Revisar Fastify, pg e JWT"
 }
 
-### Listar tarefas
-GET http://localhost:3001/tasks
-Authorization: Bearer cole_o_token_aqui
-
-### Buscar tarefa por ID
-GET http://localhost:3001/tasks/1
-Authorization: Bearer cole_o_token_aqui
-
 ### Atualizar tarefa
-PUT http://localhost:3001/tasks/1
+PUT http://localhost:3000/tarefas/1
 Authorization: Bearer cole_o_token_aqui
 Content-Type: application/json
 
 {
-  "title": "Estudar Node.js (atualizado)",
-  "description": "Incluir testes das rotas no REST Client"
+  "titulo": "Estudar Node.js (atualizado)",
+  "descricao": "Testar as rotas no REST Client"
 }
 
 ### Deletar tarefa
-DELETE http://localhost:3001/tasks/1
+DELETE http://localhost:3000/tarefas/1
 Authorization: Bearer cole_o_token_aqui
